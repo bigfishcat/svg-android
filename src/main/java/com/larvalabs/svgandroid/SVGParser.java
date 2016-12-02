@@ -994,9 +994,9 @@ public class SVGParser {
 				// Never stroke in white mode
 				return false;
 			}
-			if ("none".equals(atts.getString("display"))) {
-				return false;
-			}
+			if ("none".equals(atts.getString("display")) || "none".equals(atts.getString("stroke")) || atts.getString("stroke") == null ) {
+        			 return false;
+		        }
 
 			// Check for other stroke attributes
 			Float width = atts.getFloat("stroke-width");
@@ -1471,6 +1471,7 @@ public class SVGParser {
 						doLimits(rect);
 					}
 					if (doStroke(props)) {
+						rect.set(centerX - radiusX+strokePaint.getStrokeWidth(), centerY - radiusY + strokePaint.getStrokeWidth(), centerX + radiusX - strokePaint.getStrokeWidth(), centerY + radiusY - strokePaint.getStrokeWidth());
 						canvas.drawOval(rect, strokePaint);
 						doLimits(rect, strokePaint);
 					}
