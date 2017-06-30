@@ -367,8 +367,23 @@ public class SVGParser {
 				break;
 			}
 			case 'T':
-			case 't':
-				// todo - smooth quadratic Bezier (two parameters)
+			case 't': {
+				wasCurve = true;
+				float x = ph.nextFloat();
+				float y = ph.nextFloat();
+				if (cmd == 't') {
+					x += lastX;
+					y += lastY;
+				}
+				float x1 = 2 * lastX - lastX1;
+				float y1 = 2 * lastY - lastY1;
+				p.quadTo(x1, y1, x, y);
+				lastX1 = x1;
+				lastY1 = y1;
+				lastX = x;
+				lastY = y;
+				break;
+			}
 			case 'L':
 			case 'l': {
 				float x = ph.nextFloat();
@@ -433,8 +448,25 @@ public class SVGParser {
 				break;
 			}
 			case 'Q':
-			case 'q':
-				// todo - quadratic Bezier (four parameters)
+			case 'q': {
+				wasCurve = true;
+				float x1 = ph.nextFloat();
+				float y1 = ph.nextFloat();
+				float x = ph.nextFloat();
+				float y = ph.nextFloat();
+				if (cmd == 'q') {
+					x1 += lastX;
+					y1 += lastY;
+					x += lastX;
+					y += lastY;
+				}
+				p.quadTo(x1, y1, x, y);
+				lastX1 = x1;
+				lastY1 = y1;
+				lastX = x;
+				lastY = y;
+				break;
+			}
 			case 'S':
 			case 's': {
 				wasCurve = true;
@@ -442,7 +474,7 @@ public class SVGParser {
 				float y2 = ph.nextFloat();
 				float x = ph.nextFloat();
 				float y = ph.nextFloat();
-				if (Character.isLowerCase(cmd)) {
+				if (cmd == 's') {
 					x2 += lastX;
 					x += lastX;
 					y2 += lastY;
@@ -1386,6 +1418,13 @@ public class SVGParser {
 				Float height = getFloatAttr("height", atts);
 				Float rx = getFloatAttr("rx", atts, 0f);
 				Float ry = getFloatAttr("ry", atts, 0f);
+				if (rx > 0f && ry <= 0f) {
+					ry = rx;
+				} else if (rx <= 0f && ry > 0f) {
+					rx = ry;
+				}
+				rx = Math.min(rx, width / 2);
+				ry = Math.min(ry, height / 2);
 				pushTransform(atts);
 				Properties props = new Properties(atts);
 				rect.set(x, y, x + width, y + height);
